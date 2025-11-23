@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sundaram Mini Store</title>
+  <style>
+:root{
+  --green:#2e7d32;
+  --accent:#43a047;
+  --light:#e8f5e9;
+  --muted:#666;
+  --red:#e53935;
+  --card-bg:#ffffff;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; font-family:Arial, sans-serif; background:#f6f7f9; color:#222; }
+.page{ display:block; min-height:100vh; }
+.hidden{ display:none !important; }
+
+/* Header */
+.site-header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; background:var(--green); color:#fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.site-header h2{ margin:0; cursor:pointer; font-size:18px; letter-spacing:0.2px; }
+.header-right{ display:flex; align-items:center; gap:8px; margin: 5px 10px;}
+.admin-dot{
+  background:none; border:none; color: black; font-size:26px; cursor:pointer;
+}
+.user-area{ color:#fff; font-weight:700; }
+
+/* Container */
+.container{ padding:16px; max-width:980px; margin:0 auto; }
+
+/* Search bar */
+#searchInput{
+  width:100%; padding:12px 14px; border-radius:10px; border:1px solid #ddd;
+  margin-top:12px; font-size:16px; outline:none;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
+
+/* Category tabs */
+.tabs{ display:flex; gap:10px; margin-top:12px; overflow-x:auto; padding-bottom:6px; }
+.tab{ padding:8px 14px; border-radius:20px; white-space:nowrap;
+  border:1px solid var(--green); color:var(--green); background:var(--card-bg);
+  cursor:pointer; font-weight:600; font-size:14px;
+}
+.tab.active{ background:var(--green); color:#fff; box-shadow: 0 2px 8px rgba(46,125,50,0.12); }
+
+/* Products grid */
+.products-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px; margin-top:18px;
+}
+.product-card{
+  background:var(--card-bg); border-radius:12px; padding:14px;
+  box-shadow:0 6px 18px rgba(20,20,20,0.03);
+  transition:transform .18s ease, box-shadow .18s ease;
+  min-height:140px;
+}
+.product-card:hover{ transform:translateY(-4px); box-shadow:0 10px 24px rgba(20,20,20,0.06); }
+.title{ font-size:20px; font-weight:800; margin-bottom:6px; }
+.price{ color:var(--green); font-size:18px; font-weight:800; }
+.desc{ font-size:13px; color:var(--muted); margin:6px 0; }
+.stock{ font-size:13px; color:#444; margin-bottom:8px; }
+
+/* Buttons */
+.btn{ background:var(--accent); color:#fff; padding:8px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:700; }
+.btn:disabled{ opacity:0.6; cursor:not-allowed; }
+.small-btn{ padding:6px 8px; border-radius:8px; border:none; cursor:pointer;}
+
+/* Floating cart */
+.floating-cart{
+  position:fixed; right:18px; bottom:18px; width:200px; height:50px; border-radius:80px;
+  background:var(--green); display:flex; justify-content:center; align-items:center;
+  color:whitesmoke; font-size:25px; font-weight:700; cursor:pointer; box-shadow:0 8px 26px rgba(0,0,0,0.18); z-index:999;
+}
+
+/* Full-page cart (search-bar style cards) */
+.cart-page{
+  position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:2000;
+  display:flex; flex-direction:column; padding:18px; overflow:auto;
+}
+.cart-top{
+  max-width:980px; margin:0 auto 12px; width:100%;
+}
+.cart-info{
+  background:#f8f8f8; padding:12px 14px; border-radius:10px; border:1px solid #e6e6e6; font-size:14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+.cart-list{ max-width:980px; margin:12px auto 0; width:100%; padding:0 0 30px; }
+.cart-item-card{
+  background:#f9f9fb; padding:14px; border-radius:10px; margin-top:12px; border:1px solid #eee;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.cart-item-left{ flex:1; }
+.cart-item-right{ display:flex; align-items:center; gap:8px; }
+
+/* Order summary footer */
+.cart-summary{
+  max-width:980px; margin:16px auto; width:100%; display:flex; justify-content:space-between; align-items:center;
+  gap:12px; flex-wrap:wrap;
+}
+.summary-box{ background:#fff; padding:12px 14px; border-radius:10px; border:1px solid #eee; min-width:200px; text-align:left; }
+.checkout-actions{ display:flex; gap:8px; }
+
+/* Success box */
+.success-box{ max-width:980px; margin:18px auto; padding:16px; background:#e6ffef; border-left:6px solid #2e7d32; border-radius:8px; font-size:16px; color:#064; text-align:center; }
+
+/* Admin Panel */
+.admin-container{ padding:14px; max-width:980px; margin:14px auto; background:#fff; border-radius:12px; box-shadow:0 6px 30px rgba(0,0,0,0.04); }
+.admin-row{ display:flex; gap:8px; align-items:center; }
+.admin-product{ display:flex; justify-content:space-between; padding:10px; background:#fafafa; border-radius:8px; margin-bottom:8px; align-items:center; }
+.admin-product .meta{flex:1;}
+.admin-actions button{ margin-left:6px; }
+
+/* Order history */
+.order-card{ padding:12px; margin-bottom:10px; border-radius:10px; background:#f7fff7; border-left:4px solid var(--green); }
+.note{ font-size:13px; color:#666; margin-top:8px; }
+
+@media (max-width:520px){
+  .admin-row{ flex-direction:column; align-items:stretch; }
+  .product-card{ min-height:unset; }
+  .cart-item-card{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .cart-item-right{ width:100%; justify-content:space-between; }
+}
+  </style>
+</head>
+<body>
+
+<!-- STORE -->
+<section id="store" class="page">
+  <header class="site-header">
+    <h1 onclick="showSection('store')">Sundaram Online Mini Store 🛍️🛒</h1>
+    <div class="header-right"><br><br><br>
+      <div id="userArea" class="user-area"></div>
+      <button class="admin-dot" title="Admin" onclick="showSection('adminLogin')"></button>
+    </div>
+  </header>
+
+  <div class="container">
+    <input id="searchInput" placeholder="Search products..." oninput="renderProducts()" />
+
+    <div class="tabs" id="categoryTabs"></div>
+
+    <section id="productsGrid" class="products-grid"></section>
+  </div>
+</section>
+
+<!-- FLOATING CART BUTTON -->
+<div class="floating-cart" onclick="openCart()">Cart 🛒</div>
+
+<!-- CART PAGE (full screen) -->
+<div id="cartPage" class="cart-page hidden" aria-hidden="true">
+  <div class="cart-top">
+    <h2 style="margin:0 0 8px;text-align:center;">🛒 Your Cart</h2>
+    <div class="cart-info">
+      <div style="font-weight:700; margin-bottom:6px;">Important</div>
+      <div style="line-height:1.5;">
+        • Minimum order (subtotal) is <strong>₹80</strong>.<br>
+        • You can place orders anytime.<br>
+        • Delivery window: <strong>Evening 5:00 PM — 7:00 PM</strong> (same-day / next-day depending on order time).<br>
+        • After placing order, you will see confirmation: <strong>"Your order is successful!"</strong>
+      </div>
+    </div>
+  </div>
+
+  <div id="cartList" class="cart-list">
+    <!-- cart items will render here -->
+  </div>
+
+  <div class="cart-summary">
+    <div class="summary-box">
+      <div>Order amount : ₹<span id="cartSubtotal">0</span></div>
+      <div>Order Fee : ₹<span id="cartFee">0</span></div>
+      <div style="margin-top:6px;"><strong>Total amount : ₹<span id="cartGrand">0</span></strong></div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="checkout-actions">
+      <button class="btn" onclick="checkout()">Proceed to Checkout</button>
+      <button class="small-btn" onclick="clearCart()">Clear Cart</button>
+      <button class="small-btn" onclick="closeCart()">Close</button>
+    </div>
+  </div>
+
+  <!-- success area (hidden until order success) -->
+  <div id="cartSuccess" class="success-box hidden"></div>
+</div>
+
+<!-- USER LOGIN (with village/post/district) -->
+<section id="userLogin" class="page hidden">
+  <div class="container">
+    <div class="admin-container">
+      <h2>User Login</h2>
+      <input id="loginName" placeholder="Your full name" /><br><br>
+      <input id="loginNumber" placeholder="Phone number" maxlength="10"/><br><br>
+      <div >
+        <input id="loginVillage" placeholder="Village" /><br><br>
+        <input id="loginPost" placeholder="Post" /><br><br>
+        <input id="loginDistrict" placeholder="District" /><br><br>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn" onclick="userLogin()">Login</button>
+        <button class="small-btn" onclick="showSection('st JJore')">Back</button>
+      </div>
+      <p class="note">Login required to place order. We store your details locally on this device only.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER FORM (shown on checkout) -->
+<section id="orderForm" class="page hidden">
+  <div class="container">
+    <div class="admin-container">
+      <h2>Delivery Details</h2>
+      <input id="userName" placeholder="Full name" /><br><br>
+      <input id="userNumber" placeholder="Phone number" /><br><br>
+      <div style="gap:8px; margin-top:8px;">
+        <input id="userVillage" placeholder="Village" /><br><br>
+        <input id="userPost" placeholder="Post" /><br><br>
+        <input id="userDistrict" placeholder="District" /><br><br>
+      </div>
+      <textarea id="userAddressExtra" placeholder="Extra address / landmark (optional)"></textarea>
+
+      <div style="margin-top:8px;">
+        <p>Order amount: ₹<span id="orderPreviewSubtotal">0</span></p>
+        <p>Order Fee: ₹<span id="orderPreviewFee">0</span></p>
+        <p><strong>Total amount: ₹<span id="orderPreviewGrand">0</span></strong></p>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn" onclick="confirmOrder()">Confirm Order</button>
+        <button class="small-btn" onclick="showSection('store')">Cancel</button>
+      </div>
+      <p class="note">Minimum order amount (subtotal) is ₹80.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER HISTORY (admin only) -->
+<section id="orderHistory" class="page hidden">
+  <header class="site-header">
+    <h2>Order History</h2>
+    <button class="admin-dot" onclick="adminLogout()" title="Logout">⎋</button>
+  </header>
+  <div class="container">
+    <div id="historyList"></div>
+    <p class="note">Only admin can view this page.</p>
+  </div>
+</section>
+
+<!-- ADMIN LOGIN -->
+<section id="adminLogin" class="page hidden">
+  <div class="container">
+    <div class="admin-container">
+      <h2>Admin Login</h2>
+      <input id="adminPass" type="password" placeholder="Enter admin password" />
+      <div style="margin-top:8px;">
+        <button class="btn" onclick="adminLogin()">Login</button>
+        <button class="small-btn" onclick="showSection('store')">Back</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN PANEL -->
+<section id="adminPanel" class="page hidden">
+  <div class="container admin-container">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>Admin Panel</h2>
+      <div >
+        <button class="small-btn" onclick="showSection('store')">Store</button>
+        <button class="small-btn" onclick="showSection('orderHistory')">Orders</button>
+        <button class="small-btn" onclick="adminLogout()">Logout</button>
+      </div>
+    </div>
+
+    <h3 style="margin-top:12px">Order Fee (set by admin)</h3>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="adminOrderFee" placeholder="Enter fee amount (₹)" />
+      <button class="small-btn" onclick="adminSaveFee()">Save Fee</button>
+      <div style="margin-left:10px;color:#666">Current fee: ₹<span id="currentFeeDisplay">0</span></div>
+    </div>
+
+    <h3 style="margin-top:12px">Add New Product</h3>
+    <div class="admin-row">
+      <input id="prodName" placeholder="Product name" />
+      <input id="prodPrice" placeholder="Price" />
+      <input id="prodQty" placeholder="Quantity (stock)" />
+      <input id="prodCategory" placeholder="Category" />
+    </div><br>
+    <textarea id="prodDesc" placeholder="Short description"></textarea>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" onclick="adminAddProduct()">Add Product</button>
+    </div>
+
+    <h3 style="margin-top:14px">All Products</h3>
+    <div id="adminProducts"></div>
+
+    <p class="note">Edit / Delete from admin list. Changes affect store immediately.</p>
+  </div>
+</section>
+
+<script>
+/* ---------- DATA KEYS ---------- */
+const KEY_PRODUCTS = 'sundaram_products_v2';
+const KEY_CART = 'sundaram_cart_v2';
+const KEY_ORDERS = 'sundaram_orders_v2';
+const KEY_USER = 'sundaram_user_v1';
+const KEY_ORDER_FEE = 'sundaram_order_fee_v1';
+
+/* ---------- AUTH ---------- */
+const ADMIN_PASS = '@sundaram@';
+let isAdmin = false;
+
+/* ---------- USER LOGIN STATE ---------- */
+let USER = JSON.parse(localStorage.getItem(KEY_USER) || 'null');
+let pendingCheckout = false; // if user clicked checkout but not logged in
+
+/* ---------- ORDER FEE ---------- */
+let ORDER_FEE = parseFloat(localStorage.getItem(KEY_ORDER_FEE) || '0') || 0;
+
+/* ---------- LOAD / INIT ---------- */
+let PRODUCTS = JSON.parse(localStorage.getItem(KEY_PRODUCTS) || 'null');
+if(!PRODUCTS){
+  PRODUCTS = [
+    {id:'p1', name:'Parle-G Biscuit', price:5, desc:'Fresh & popular', category:'biscuit', qty:50},
+    {id:'p2', name:'Kurkure Masala', price:10, desc:'Crispy snack', category:'namkeen', qty:30},
+    {id:'p3', name:'Lays Chips', price:20, desc:'Classic chips', category:'chips', qty:25},
+    {id:'p4', name:'Mango Bite', price:1, desc:'Candy', category:'chocolate', qty:100},
+  ];
+  localStorage.setItem(KEY_PRODUCTS, JSON.stringify(PRODUCTS));
+}
+let CART = JSON.parse(localStorage.getItem(KEY_CART) || '[]');
+let ORDERS = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+
+/* ---------- UTIL ---------- */
+function saveProducts(){ localStorage.setItem(KEY_PRODUCTS, JSON.stringify(PRODUCTS)); }
+function saveCart(){ localStorage.setItem(KEY_CART, JSON.stringify(CART)); }
+function saveOrders(){ localStorage.setItem(KEY_ORDERS, JSON.stringify(ORDERS)); }
+function saveUser(){ localStorage.setItem(KEY_USER, JSON.stringify(USER)); }
+function saveOrderFee(){ localStorage.setItem(KEY_ORDER_FEE, String(ORDER_FEE)); }
+
+/* ---------- UI UPDATES ---------- */
+function updateFeeDisplays(){
+  document.getElementById('cartFee').innerText = ORDER_FEE;
+  const cf = document.getElementById('currentFeeDisplay');
+  if(cf) cf.innerText = ORDER_FEE;
+  const opf = document.getElementById('orderPreviewFee');
+  if(opf) opf.innerText = ORDER_FEE;
+}
+
+/* update user area (header) */
+function updateUserArea(){
+  const ua = document.getElementById('userArea');
+  if(USER && USER.name){
+    let smallAddr = '';
+    if(USER.village || USER.post || USER.district){
+      smallAddr = ` — ${USER.village || ''}${USER.village && (USER.post||USER.district)?', ':''}${USER.post||''}${USER.post && USER.district?', ':''}${USER.district||''}`;
+    }
+    ua.innerHTML = `Hi, ${USER.name}${smallAddr} <button class="small-btn" onclick="userLogout()">Logout</button>`;
+    // prefill order form fields
+    const un = document.getElementById('userName');
+    if(un) un.value = USER.name || '';
+    const unum = document.getElementById('userNumber');
+    if(unum) unum.value = USER.number || '';
+    const uv = document.getElementById('userVillage'); if(uv) uv.value = USER.village || '';
+    const up = document.getElementById('userPost'); if(up) up.value = USER.post || '';
+    const ud = document.getElementById('userDistrict'); if(ud) ud.value = USER.district || '';
+  } else {
+    ua.innerHTML = `<button class="btn" onclick="showSection('userLogin')">Login</button>`;
+  }
+}
+
+/* ---------- NAV / SECTIONS ---------- */
+function showSection(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  // hide cart page too when navigating away
+  document.getElementById('cartPage').classList.add('hidden');
+  document.getElementById('cartSuccess').classList.add('hidden');
+  document.getElementById(id).classList.remove('hidden');
+  if(id==='store'){ renderTabs(); renderProducts(); updateUserArea(); updateFeeDisplays(); updateCartTotals(); }
+  if(id==='orderHistory'){ if(!isAdmin){ alert('Order history only for admin'); showSection('adminLogin'); } else loadOrderHistory(); }
+  if(id==='adminPanel'){ if(!isAdmin){ alert('Login as admin'); showSection('adminLogin'); } else { loadAdminProducts(); updateFeeDisplays(); } }
+}
+
+/* ---------- CATEGORY TABS ---------- */
+let CURRENT_CAT = 'all';
+function renderTabs(){
+  const box = document.getElementById('categoryTabs');
+  const cats = ['all', ...new Set(PRODUCTS.map(p=>p.category))];
+  box.innerHTML = cats.map(c=>{
+    const active = c===CURRENT_CAT ? 'tab active' : 'tab';
+    return `<div class="${active}" onclick="setCategory('${c}', this)">${c}</div>`;
+  }).join('');
+}
+function setCategory(cat, el){
+  CURRENT_CAT = cat;
+  document.querySelectorAll('#categoryTabs .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderProducts();
+}
+
+/* ---------- RENDER PRODUCTS ---------- */
+function renderProducts(){
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const grid = document.getElementById('productsGrid');
+  const items = PRODUCTS
+    .filter(p => CURRENT_CAT==='all' || p.category===CURRENT_CAT)
+    .filter(p => !q || p.name.toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q));
+
+  if(items.length===0){ grid.innerHTML = '<p style="grid-column:1/-1;color:#666">No products found</p>'; return; }
+
+  grid.innerHTML = items.map(p=>{
+    const disabled = p.qty <= 0;
+    return `
+      <div class="product-card">
+        <div class="title">${p.name}</div>
+        <div class="price">₹${p.price} &nbsp; <span style="font-size:13px;color:#777">(${p.category})</span></div>
+        <div class="desc">${p.desc}</div>
+        <div class="stock">Available: <strong>${p.qty}</strong></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" ${disabled? 'disabled' : ''} onclick="addToCart('${p.id}')">Add to Cart</button>
+          <button class="small-btn" onclick="openDetail('${p.id}')">Details</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- DETAIL (simple) ---------- */
+function openDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return alert('Product not found');
+  alert(`${p.name}\nPrice: ₹${p.price}\nAvailable: ${p.qty}\n\n${p.desc}`);
+}
+
+/* ---------- CART FUNCTIONS (full-page cart) ---------- */
+function addToCart(id){
+  const prod = PRODUCTS.find(x=>x.id===id);
+  if(!prod) return alert('Item not found');
+  const inCart = CART.find(c=>c.id===id);
+  const wantQty = (inCart ? inCart.qty + 1 : 1);
+  if(wantQty > prod.qty) return alert('Sorry, not enough stock available');
+  if(inCart) inCart.qty++;
+  else CART.push({ id:prod.id, name:prod.name, price:prod.price, qty:1 });
+  saveCart(); loadCart(); alert('Added to cart');
+}
+
+function loadCart(){
+  const list = document.getElementById('cartList');
+  const itemsDiv = list;
+  if(!itemsDiv) return;
+  if(CART.length===0){
+    itemsDiv.innerHTML = '<p style="color:#666">Cart is empty</p>';
+  } else {
+    itemsDiv.innerHTML = CART.map((it, idx)=>{
+      return `
+        <div class="cart-item-card">
+          <div class="cart-item-left">
+            <div style="font-weight:800;font-size:16px;">${it.name}</div>
+            <div style="font-size:14px;color:#555;">₹${it.price} × ${it.qty} = <strong>₹${it.price*it.qty}</strong></div>
+          </div>
+          <div class="cart-item-right">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button onclick="changeCartQty(${idx}, -1)" style="padding:6px 10px;border-radius:8px;border:none;background:#eee;font-size:16px;">-</button>
+              <div style="padding:6px 12px;background:#fff;border-radius:8px;border:1px solid #eee;">${it.qty}</div>
+              <button onclick="changeCartQty(${idx}, 1)" style="padding:6px 10px;border-radius:8px;border:none;background:#eee;font-size:16px;">+</button>
+            </div>
+            <div>
+              <button onclick="removeCartItem(${idx})" style="margin-left:10px;background:#ff4444;color:#fff;padding:8px 10px;border-radius:8px;border:none;">Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  updateCartTotals();
+}
+
+function updateCartTotals(){
+  const subtotal = CART.reduce((s,i)=>s + i.price*i.qty, 0);
+  const fee = ORDER_FEE || 0;
+  const grand = subtotal + fee;
+  const cs = document.getElementById('cartSubtotal');
+  if(cs) cs.innerText = subtotal;
+  const cf = document.getElementById('cartFee');
+  if(cf) cf.innerText = fee;
+  const cg = document.getElementById('cartGrand');
+  if(cg) cg.innerText = grand;
+
+  // also update small elements if exist
+  const cartTotal = document.getElementById('cartTotal');
+  if(cartTotal) cartTotal.innerText = grand;
+  const orderPreviewSubtotal = document.getElementById('orderPreviewSubtotal');
+  if(orderPreviewSubtotal) orderPreviewSubtotal.innerText = subtotal;
+  const orderPreviewFee = document.getElementById('orderPreviewFee');
+  if(orderPreviewFee) orderPreviewFee.innerText = fee;
+  const orderPreviewGrand = document.getElementById('orderPreviewGrand');
+  if(orderPreviewGrand) orderPreviewGrand.innerText = grand;
+}
+
+function openCart(){
+  loadCart();
+  updateCartTotals();
+  updateFeeDisplays();
+  document.getElementById('cartSuccess').classList.add('hidden');
+  document.getElementById('cartPage').classList.remove('hidden');
+  document.getElementById('cartPage').setAttribute('aria-hidden','false');
+}
+function closeCart(){
+  document.getElementById('cartPage').classList.add('hidden');
+  document.getElementById('cartPage').setAttribute('aria-hidden','true');
+}
+function changeCartQty(i, delta){
+  const item = CART[i];
+  if(!item) return;
+  const prod = PRODUCTS.find(p=>p.id===item.id);
+  if(!prod) return;
+  const newQty = item.qty + delta;
+  if(newQty <= 0){ if(confirm('Remove item from cart?')){ CART.splice(i,1); } }
+  else {
+    if(newQty > prod.qty){ return alert('Not enough stock available'); }
+    item.qty = newQty;
+  }
+  saveCart(); loadCart();
+}
+function removeCartItem(i){
+  if(confirm('Delete this item from cart?')){ CART.splice(i,1); saveCart(); loadCart(); }
+}
+function clearCart(){ if(confirm('Clear cart?')){ CART = []; saveCart(); loadCart(); } }
+
+/* ---------- CHECKOUT & ORDER ---------- */
+function checkout(){
+  if(CART.length===0) return alert('Cart is empty');
+  // validate stock again
+  for(const it of CART){
+    const prod = PRODUCTS.find(p=>p.id===it.id);
+    if(!prod || it.qty > prod.qty) return alert(`Item "${it.name}" has insufficient stock. Please adjust cart.`);
+  }
+
+  // Ensure user is logged in before showing order form
+  if(!USER){
+    // prompt user to login
+    pendingCheckout = true;
+    alert('Please login before checkout');
+    showSection('userLogin');
+    return;
+  }
+
+  // show order form with totals (subtotal, fee, grand)
+  const subtotal = CART.reduce((s,i)=>s + i.price*i.qty,0);
+  document.getElementById('orderPreviewSubtotal').innerText = subtotal;
+  document.getElementById('orderPreviewFee').innerText = ORDER_FEE;
+  document.getElementById('orderPreviewGrand').innerText = subtotal + ORDER_FEE;
+
+  // prefill user info
+  document.getElementById('userName').value = USER.name || '';
+  document.getElementById('userNumber').value = USER.number || '';
+  document.getElementById('userVillage').value = USER.village || '';
+  document.getElementById('userPost').value = USER.post || '';
+  document.getElementById('userDistrict').value = USER.district || '';
+
+  showSection('orderForm');
+}
+
+function confirmOrder(){
+  const name = (document.getElementById('userName').value || '').trim();
+  const number = (document.getElementById('userNumber').value || '').trim();
+  const village = (document.getElementById('userVillage').value || '').trim();
+  const post = (document.getElementById('userPost').value || '').trim();
+  const district = (document.getElementById('userDistrict').value || '').trim();
+  const extra = (document.getElementById('userAddressExtra').value || '').trim();
+
+  if(!name || !number) return alert('Please enter name and phone');
+
+  // enforce minimum order ₹80 on subtotal
+  const subtotal = CART.reduce((s,i)=>s + i.price*i.qty,0);
+  if(subtotal < 80) return alert('Minimum order amount is ₹80. Add more items to proceed.');
+
+  // final stock check
+  for(const it of CART){
+    const prod = PRODUCTS.find(p=>p.id===it.id);
+    if(!prod || it.qty > prod.qty) return alert(`Item "${it.name}" has insufficient stock. Please adjust cart.`);
+  }
+
+  // create order
+  const grandTotal = subtotal + ORDER_FEE;
+  const order = {
+    id: 'o' + Date.now(),
+    items: JSON.parse(JSON.stringify(CART)),
+    subtotal,
+    fee: ORDER_FEE,
+    grandTotal,
+    date: new Date().toLocaleString(),
+    customer: { name, number, village, post, district, extra },
+    status: 'pending' // pending | delivered
+  };
+  ORDERS.push(order);
+  saveOrders();
+
+  // reduce stock
+  for(const it of CART){
+    const prod = PRODUCTS.find(p=>p.id===it.id);
+    if(prod) prod.qty = Math.max(0, prod.qty - it.qty);
+  }
+  saveProducts();
+
+  // Save user info locally (so next time it's auto-filled)
+  USER = { name, number, village, post, district };
+  saveUser();
+
+  // clear cart and show success on cart page
+  CART = []; saveCart();
+
+  // Display success message on cart page
+  const successBox = document.getElementById('cartSuccess');
+  successBox.classList.remove('hidden');
+  successBox.innerHTML = `
+    <div style="font-size:20px;font-weight:800;">🎉 Order is successful!</div>
+    <div style="margin-top:8px;">Order ID: <strong>${order.id}</strong></div>
+    <div style="margin-top:8px;">Thank you, ${order.customer.name}. Aap kabhi bhi order kar sakte hain. Delivery window: <strong>5:00 PM — 7:00 PM</strong>.</div>
+    <div style="margin-top:10px;">Total Paid: ₹${order.grandTotal} (including ₹${order.fee} order fee)</div>
+    <div style="margin-top:14px;"><button class="btn" onclick="showSection('store')">Back to Store</button></div>
+  `;
+  // show cart page (with empty list + success)
+  openCart();
+  loadCart();
+}
+
+/* ---------- USER LOGIN / LOGOUT ---------- */
+function userLogin(){
+  const name = (document.getElementById('loginName').value || '').trim();
+  const number = (document.getElementById('loginNumber').value || '').trim();
+  const village = (document.getElementById('loginVillage').value || '').trim();
+  const post = (document.getElementById('loginPost').value || '').trim();
+  const district = (document.getElementById('loginDistrict').value || '').trim();
+
+  if(!name || !number) return alert('Enter name and phone number');
+  USER = { name, number, village, post, district };
+  saveUser();
+  updateUserArea();
+  alert('Logged in as ' + name);
+  // if user came here for checkout, continue
+  if(pendingCheckout){
+    pendingCheckout = false;
+    const subtotal = CART.reduce((s,i)=>s + i.price*i.qty,0);
+    document.getElementById('orderPreviewSubtotal').innerText = subtotal;
+    document.getElementById('orderPreviewFee').innerText = ORDER_FEE;
+    document.getElementById('orderPreviewGrand').innerText = subtotal + ORDER_FEE;
+    // prefill order form fields
+    document.getElementById('userName').value = USER.name;
+    document.getElementById('userNumber').value = USER.number;
+    document.getElementById('userVillage').value = USER.village || '';
+    document.getElementById('userPost').value = USER.post || '';
+    document.getElementById('userDistrict').value = USER.district || '';
+    showSection('orderForm');
+  } else {
+    showSection('store');
+  }
+}
+
+function userLogout(){
+  if(confirm('Logout?')) {
+    USER = null;
+    localStorage.removeItem(KEY_USER);
+    updateUserArea();
+    alert('Logged out');
+    showSection('store');
+  }
+}
+
+/* ---------- ORDER HISTORY (admin only) ---------- */
+function loadOrderHistory(){
+  const list = document.getElementById('historyList');
+  if(ORDERS.length===0){ list.innerHTML = '<p style="color:#666">No orders yet</p>'; return; }
+  list.innerHTML = ORDERS.slice().reverse().map((o, idx)=>{
+    const index = ORDERS.length - 1 - idx; // original index in ORDERS
+    return `
+      <div class="order-card">
+        <div><strong>Order ID:</strong> ${o.id}</div>
+        <div><strong>Date:</strong> ${o.date}</div>
+        <div><strong>Customer:</strong> ${o.customer.name} / ${o.customer.number}</div>
+        <div><strong>Address:</strong> ${o.customer.village || ''}${o.customer.post? ', '+o.customer.post : ''}${o.customer.district? ', '+o.customer.district: ''}${o.customer.extra? ' — '+o.customer.extra : ''}</div>
+        <div><strong>Items:</strong>
+          <ul style="margin:6px 0 0 18px;">
+            ${o.items.map(it=>`<li>${it.name} x${it.qty} — ₹${it.price*it.qty}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="margin-top:8px;"><strong>Subtotal:</strong> ₹${o.subtotal}</div>
+        <div><strong>Order Fee:</strong> ₹${o.fee}</div>
+        <div style="margin-top:8px;"><strong>Grand Total:</strong> ₹${o.grandTotal}</div>
+        <div style="margin-top:8px;">
+          <strong>Status:</strong> <span id="status_${index}">${o.status}</span>
+          <button class="small-btn" onclick="adminToggleStatus(${index})">Toggle Status</button>
+          <button class="small-btn" style="background:#f44336;color:#fff" onclick="adminDeleteOrder(${index})">Delete Order</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function adminToggleStatus(idx){
+  const o = ORDERS[idx];
+  if(!o) return;
+  o.status = (o.status === 'pending') ? 'delivered' : 'pending';
+  saveOrders();
+  loadOrderHistory();
+}
+
+function adminDeleteOrder(idx){
+  if(!confirm('Delete this order?')) return;
+  ORDERS.splice(idx,1);
+  saveOrders();
+  loadOrderHistory();
+}
+
+/* ---------- ADMIN PANEL (edit/delete/qty) ---------- */
+function adminLogin(){
+  const pass = document.getElementById('adminPass').value || '';
+  if(pass !== ADMIN_PASS) return alert('Wrong password');
+  isAdmin = true;
+  document.getElementById('adminPass').value = '';
+  showSection('adminPanel');
+  loadAdminProducts();
+}
+
+function adminAddProduct(){
+  const name = (document.getElementById('prodName').value || '').trim();
+  const price = parseFloat(document.getElementById('prodPrice').value || 0);
+  const qty = parseInt(document.getElementById('prodQty').value || 0);
+  const category = (document.getElementById('prodCategory').value || 'daily').trim();
+  const desc = (document.getElementById('prodDesc').value || '').trim();
+  if(!name || !price || isNaN(qty)){ return alert('Fill name, price and quantity'); }
+  const id = 'p' + Date.now();
+  PRODUCTS.push({ id, name, price, desc, category, qty });
+  saveProducts();
+  // clear inputs
+  document.getElementById('prodName').value=''; document.getElementById('prodPrice').value=''; document.getElementById('prodQty').value=''; document.getElementById('prodCategory').value=''; document.getElementById('prodDesc').value='';
+  loadAdminProducts(); renderTabs(); renderProducts();
+}
+
+function loadAdminProducts(){
+  const area = document.getElementById('adminProducts');
+  if(PRODUCTS.length===0){ area.innerHTML = '<p style="color:#666">No products</p>'; return; }
+  area.innerHTML = PRODUCTS.map((p, idx)=>{
+    return `
+    <div class="admin-product">
+      <div class="meta">
+        <div style="font-weight:800">${p.name} <span style="font-weight:600;color:#666">- ₹${p.price}</span></div>
+        <div style="font-size:13px;color:#666">${p.desc} &nbsp; • &nbsp; Category: ${p.category} &nbsp; • &nbsp; Stock: <strong>${p.qty}</strong></div>
+      </div>
+      <div class="admin-actions">
+        <button class="small-btn" onclick="adminEdit(${idx})">Edit</button>
+        <button class="small-btn" onclick="adminChangeQty(${idx})">Change Qty</button>
+        <button class="small-btn" onclick="adminDelete(${idx})" style="background:${'#f44336'}; color:#fff;">Delete</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+function adminEdit(idx){
+  const p = PRODUCTS[idx];
+  const name = prompt('Name', p.name);
+  if(name===null) return;
+  const price = prompt('Price', p.price);
+  if(price===null) return;
+  const category = prompt('Category', p.category);
+  if(category===null) return;
+  const desc = prompt('Description', p.desc);
+  if(desc===null) return;
+  p.name = name;
+  p.price = parseFloat(price) || p.price;
+  p.category = category;
+  p.desc = desc;
+  saveProducts(); loadAdminProducts(); renderTabs(); renderProducts();
+}
+
+function adminChangeQty(idx){
+  const p = PRODUCTS[idx];
+  const newQty = prompt('Set new stock quantity for "'+p.name+'"', p.qty);
+  if(newQty===null) return;
+  p.qty = parseInt(newQty) || 0;
+  saveProducts(); loadAdminProducts(); renderTabs(); renderProducts();
+}
+
+function adminDelete(idx){
+  if(!confirm('Delete this product?')) return;
+  PRODUCTS.splice(idx,1);
+  saveProducts(); loadAdminProducts(); renderTabs(); renderProducts();
+}
+
+function adminLogout(){
+  isAdmin = false;
+  showSection('store');
+}
+
+/* ---------- ADMIN: Order Fee ---------- */
+function adminSaveFee(){
+  const val = parseFloat((document.getElementById('adminOrderFee').value || '').trim());
+  if(isNaN(val) || val < 0) return alert('Enter valid fee (>= 0)');
+  ORDER_FEE = val;
+  saveOrderFee();
+  updateFeeDisplays();
+  updateCartTotals();
+  alert('Order fee updated to ₹' + ORDER_FEE);
+}
+
+/* ---------- INIT ---------- */
+renderTabs();
+showSection('store');
+loadCart();
+updateUserArea();
+updateFeeDisplays();
+
+/* attach searchProducts if needed (simple) */
+function searchProducts(){ renderProducts(); }
+</script>
+
+</body>
+</html>
+
