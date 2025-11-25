@@ -159,7 +159,7 @@ body{ margin:0; font-family:Arial, sans-serif; background:#f6f7f9; color:#222; }
     <div class="cart-info">
       <div style="font-weight:700; margin-bottom:6px;">Important</div>
       <div style="line-height:1.5;">
-        • Minimum order (subtotal) is <strong>₹80</strong>.<br>
+        • Minimum order (subtotal) is <strong>₹30</strong>.<br>
         • You can place orders anytime.<br>
         • Delivery window: <strong>Evening 5:00 PM — 7:00 PM</strong> (same-day / next-day depending on order time).<br>
         • After placing order, you will see confirmation: <strong>"Your order is successful!"</strong>
@@ -236,7 +236,7 @@ body{ margin:0; font-family:Arial, sans-serif; background:#f6f7f9; color:#222; }
         <button class="btn" onclick="confirmOrder()">Confirm Order</button>
         <button class="small-btn" onclick="showSection('store')">Cancel</button>
       </div>
-      <p class="note">Minimum order amount (subtotal) is ₹80.</p>
+      <p class="note">Minimum order amount (subtotal) is ₹30.</p>
     </div>
   </div>
 </section>
@@ -578,9 +578,9 @@ function confirmOrder(){
 
   if(!name || !number) return alert('Please enter name and phone');
 
-  // enforce minimum order ₹80 on subtotal
+  // enforce minimum order ₹30 on subtotal
   const subtotal = CART.reduce((s,i)=>s + i.price*i.qty,0);
-  if(subtotal < 80) return alert('Minimum order amount is ₹80. Add more items to proceed.');
+  if(subtotal < 30) return alert('Minimum order amount is ₹30. Add more items to proceed.');
 
   // final stock check
   for(const it of CART){
